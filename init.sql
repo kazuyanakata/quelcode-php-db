@@ -7,6 +7,7 @@ CREATE TABLE members (
   phone_number      VARCHAR(11)   NOT NULL,
   birthday          CHAR(10)      NOT NULL,
   prefecture_id     CHAR(2)       NOT NULL REFERENCES prefectures(id),
+  status_id         INTEGER       DEFAULT 1 NOT NULL REFERENCES statuses(id),
   created_at        DATETIME      DEFAULT CURRENT_TIMESTAMP NOT NULL,
   updated_at        TIMESTAMP     DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP NOT NULL
 ) ENGINE = INNODB;
@@ -14,6 +15,14 @@ CREATE TABLE members (
 -- prefecturesテーブル
 CREATE TABLE prefectures (
   id            CHAR(2)       PRIMARY KEY,
+  name          VARCHAR(100)  NOT NULL,
+  created_at    DATETIME      DEFAULT CURRENT_TIMESTAMP NOT NULL,
+  updated_at    TIMESTAMP     DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP NOT NULL
+) ENGINE = INNODB;
+
+-- statusesテーブル
+CREATE TABLE statuses (
+  id            INTEGER       PRIMARY KEY AUTO_INCREMENT,
   name          VARCHAR(100)  NOT NULL,
   created_at    DATETIME      DEFAULT CURRENT_TIMESTAMP NOT NULL,
   updated_at    TIMESTAMP     DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP NOT NULL
@@ -69,3 +78,13 @@ INSERT INTO prefectures
             ('45', '宮崎県'),
             ('46', '鹿児島県'),
             ('47', '沖縄県');
+
+-- statusesテーブルにステータス一覧を挿入
+INSERT INTO statuses
+            (name)
+     VALUES ('受付済'),
+            ('プレワーク案内済'),
+            ('プレワーク中'),
+            ('本エントリー済'),
+            ('休会中'),
+            ('退会');

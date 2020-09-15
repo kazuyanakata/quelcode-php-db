@@ -1,0 +1,195 @@
+@charset "UTF-8";
+
+* {
+  text-decoration: none;
+  list-style: none;
+}
+/* 全ページ共通部分 */
+body {
+  display: flex;
+}
+header {
+  width: 20%;
+  background-color: #003333;
+  padding: 50px 0 0 40px;
+}
+.header-list-items {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 100px;
+}
+.header-link {
+  color: white;
+  font-size: 23px;
+  font-weight: bold;
+}
+main {
+  width: 80%;
+  min-height: 100vh;
+  padding: 50px 40px 0 40px;
+}
+.main-title {
+  color: #455a64;
+  font-size: 25px;
+  margin-bottom: 30px;
+}
+/* indexページ */
+.status-count-title {
+  font-size: 23px;
+  margin-bottom: 20px;
+}
+.status-count-table {
+  width: 500px;
+  border-collapse: collapse;
+}
+.table-row {
+  border-bottom: 1px solid #455a64;
+}
+.table-row, .table-row-last {
+  height: 30px;
+}
+.table-head-left, .table-data-left {
+  width: 70%;
+  text-align: left;
+}
+.table-head-left {
+  padding-left: 50px;
+  color: #455a64;
+  font-weight: normal;
+}
+.table-data-left {
+  padding-left: 10px;
+}
+.table-data-left a {
+  color: blue;
+}
+.table-head-right, .table-data-right {
+  width: 30%;
+  text-align: right;
+}
+.table-head-right {
+  padding-right: 30px;
+  color: #455a64;
+  font-weight: normal;
+}
+.table-data-right {
+  padding-right: 10px;
+}
+.table-span {
+  margin-right: 30px;
+}
+
+/* listページ */
+.search {
+  margin-bottom: 30px;
+}
+.search-title {
+  font-size: 18px;
+}
+.search-form {
+  width: 700px;
+  display: flex;
+  justify-content: space-between;
+  font-size: 18px;
+}
+.search-form-items {
+  width: 550px;
+  display: flex;
+  justify-content: space-between;
+}
+.search-form-name, .search-form-status {
+  display: flex;
+  justify-content: space-between;
+}
+input[type='text'] {
+  width: 150px;
+  border: 1px solid #455a64;
+  margin-left: 20px;
+}
+.search-form-status select {
+  width: 200px;
+  border: 1px solid #455a64;
+  margin-left: 20px;
+}
+.search-form-submit {
+  width: 100px;
+  background-color: blue;
+  color: white;
+}
+.list-table {
+  border-collapse: collapse;
+  width: 100%;
+  margin-bottom: 30px;
+}
+.list-table-row, .list-table-row-first {
+  border-bottom: 1px solid #455a64;
+}
+.list-table-row {
+  height: 60px;
+}
+.table-head {
+  text-align: center;
+  color: #455a64;
+  font-weight: normal;
+  font-size: 14px;
+}
+.table-data {
+  font-size: 16px;
+  text-align: center;
+}
+.detail a {
+  color: blue;
+}
+.name-furigana {
+  font-size: 10px;
+}
+.search-none {
+  margin-top: 30px;
+}
+
+/* detailページ */
+.status-update {
+  margin-bottom: 10px;
+}
+.status-update-title {
+  font-size: 16px;
+  font-weight: normal;
+  color: #455a64;
+}
+.update-form {
+  width: 300px;
+  display: flex;
+  justify-content: space-between;
+}
+.update-form select {
+  border: 1px solid #455a64;
+  width: 150px;
+}
+.update-form-submit {
+  width: 100px;
+  background-color: blue;
+  color: white;
+}
+.member-detail {
+  margin-bottom: 30px;
+}
+.member-detail-item {
+  margin-bottom: 20px;
+}
+.detail-title {
+  font-size: 13px;
+  color: #455a64;
+  margin-bottom: 3px;
+}
+.return-list {
+  margin-bottom: 30px;
+}
+.return-list a{
+  color: blue;
+}
+
+/* errorページ */
+.error {
+  color: red;
+}

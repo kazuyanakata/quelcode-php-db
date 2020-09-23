@@ -1,11 +1,6 @@
 <?php
 session_start();
-try {
-  $db = new PDO('mysql:dbname=quelcode-php-db;host=mysql;charset=utf8', 'root', 'root');
-} catch (PDOException $e) {
-  header('Location: ../error.php');
-  exit();
-}
+require_once('../dbconnect.php');
 
 if (empty($_SESSION['update'])){//直接アップデートに入った場合はエラー画面へ
   header('Location: ../error.php');

@@ -1,11 +1,6 @@
 <?php
 session_start();
-try {
-  $db = new PDO('mysql:dbname=quelcode-php-db;host=mysql;charset=utf8', 'root', 'root');
-} catch (PDOException $e) {
-  header('Location: ../error.php');
-  exit();
-}
+require_once('../dbconnect.php');
 
 function h($value) {// htmlspecialchars設定
   return htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
@@ -19,21 +14,34 @@ function a($value) {// 満年齢計算
   $birthday = str_replace('/','',$value);
   return floor(($now - $birthday)/10000);
 }
+function decryption($value){// 復号処理
+  $method = 'AES-256-CBC';
+  $decryption_item = openssl_decrypt(base64_decode($value), $method, getenv('ENCRYPTKEY'), OPENSSL_RAW_DATA, getenv('ENCRYPTIV'));
+  return $decryption_item;
+}
+//↓検索状況別に閲覧するメンバーを選択する
 if (!empty($_GET) && !empty($_GET['search-status'])){//名前とステータス検索、またはステータスのみ検索している場合(ステータスが「すべて」の場合を除く)
-  $search_name = $_GET['search-name'];
+  if (!empty($_GET['search-name'])) {//名前が入力されていた場合
+    $name_parts = str_split($_GET['search-name']);
+    $search_name = '';
+    foreach ($name_parts as $name_part) {
+      $search_name .= crypt($name_part, getenv('ENCRYPTKEY'));
+    }
+  } elseif (empty($_GET['search-name'])) {//名前が入力されていない場合
+    $search_name = $_GET['search-name'];
+  }
   $search_status = $_GET['search-status'];
-  // ↓セッションに代入
-  $_SESSION['list']['search_name'] = $search_name;
+  $_SESSION['list']['search_name'] = $_GET['search-name'];
   $_SESSION['list']['search_status'] = $search_status;
   // ↓メンバー詳細一覧を作成→連想配列に代入
-  $member_lists = $db->prepare('SELECT m.id, m.name, m.furigana, m.birthday, m.created_at, p.name AS pref_name, s.name AS status_name, s.id AS status_id
+  $member_lists = $db->prepare('SELECT m.id, m.name, m.name_hash, m.furigana, m.furigana_hash, m.birthday, m.created_at, p.name AS pref_name, s.name AS status_name, s.id AS status_id
                                   FROM members m
                              LEFT JOIN prefectures p
                                     ON p.id = m.prefecture_id
                              LEFT JOIN statuses s
                                     ON s.id = m.status_id
-                                 WHERE (m.name LIKE ?
-                                    OR m.furigana LIKE ?)
+                                 WHERE (m.name_hash LIKE ?
+                                    OR m.furigana_hash LIKE ?)
                                    AND status_id IN (?)
                               ORDER BY m.id');
   $member_lists->execute(array("%$search_name%",
@@ -53,18 +61,26 @@ if (!empty($_GET) && !empty($_GET['search-status'])){//名前とステータス�
     ];
   }
 } elseif (!empty($_GET) && empty($_GET['search-status'])) {//名前の検索のみ行い、ステータスは「すべて」である場合
-  $search_name = $_GET['search-name'];
+  if (!empty($_GET['search-name'])) {//名前が入力されていた場合
+    $name_parts = str_split($_GET['search-name']);
+    $search_name = '';
+    foreach ($name_parts as $name_part) {
+      $search_name .= crypt($name_part, getenv('ENCRYPTKEY'));
+    }
+  } elseif (empty($_GET['search-name'])) {//名前が入力されていない場合
+    $search_name = $_GET['search-name'];
+  }
   $search_status = $_GET['search-status'];
-  $_SESSION['list']['search_name'] = $search_name;
+  $_SESSION['list']['search_name'] = $_GET['search-name'];
   $_SESSION['list']['search_status'] = $search_status;
-  $member_lists = $db->prepare('SELECT m.id, m.name, m.furigana, m.birthday, m.created_at, p.name AS pref_name, s.name AS status_name, s.id AS status_id
+  $member_lists = $db->prepare('SELECT m.id, m.name, m.name_hash, m.furigana, m.furigana_hash, m.birthday, m.created_at, p.name AS pref_name, s.name AS status_name, s.id AS status_id
                                   FROM members m
                              LEFT JOIN prefectures p
                                     ON p.id = m.prefecture_id
                              LEFT JOIN statuses s
                                     ON s.id = m.status_id
-                                 WHERE (m.name LIKE ?
-                                    OR m.furigana LIKE ?)
+                                 WHERE (m.name_hash LIKE ?
+                                    OR m.furigana_hash LIKE ?)
                               ORDER BY m.id');
   $member_lists->execute(array("%$search_name%",
                                "%$search_name%",
@@ -143,7 +159,7 @@ if (!empty($member_info) || !empty($_GET))://メンバーが0ではない、ま�
         <ul class="search-form-items">
           <li class="search-form-name">
             <p>名前</p>
-            <input type="text" name="search-name" value="<?php if (!empty($_GET)){ echo h($search_name);}?>">
+            <input type="text" name="search-name" value="<?php if (!empty($_GET)){ echo h($_GET['search-name']);}?>">
           </li>
           <li class="search-form-status">
             <p>ステータス</p>
@@ -173,13 +189,13 @@ if (!empty($member_info) || !empty($_GET))://メンバーが0ではない、ま�
     </div>
     <table class="list-table">
       <tr class="list-table-row-first">
-        <th class="table-head num">No</th>
-        <th class="table-head date">申込日</th>
-        <th class="table-head name">名前</th>
-        <th class="table-head pref">都道府県</th>
-        <th class="table-head age">年齢</th>
-        <th class="table-head status">ステータス</th>
-        <th class="table-head detail">詳細</th>
+        <th class="table-head">No</th>
+        <th class="table-head">申込日</th>
+        <th class="table-head">名前</th>
+        <th class="table-head">都道府県</th>
+        <th class="table-head">年齢</th>
+        <th class="table-head">ステータス</th>
+        <th class="table-head">詳細</th>
       </tr>
 <?php 
     foreach($member_info as $member_id => $info):
@@ -197,15 +213,15 @@ if (!empty($member_info) || !empty($_GET))://メンバーが0ではない、ま�
 <?php
       endif;
 ?>
-        <td class="table-data num"><?php echo h($member_id)?></td>
-        <td class="table-data date"><?php echo h(t($info[0]))?></td>
-        <td class="table-data name">
-          <p class="name-furigana"><?php echo h($info[1])?></p>
-          <p class="name-name"><?php echo h($info[2])?></p>
+        <td class="table-data"><?php echo h($member_id)?></td>
+        <td class="table-data"><?php echo h(t($info[0]))?></td>
+        <td class="table-data">
+          <p class="name-furigana"><?php echo h(decryption($info[1]))?></p>
+          <p class="name-name"><?php echo h(decryption($info[2]))?></p>
         </td>
-        <td class="table-data pref"><?php echo h($info[3])?></td>
-        <td class="table-data age"><?php echo h(a($info[4]))?></td>
-        <td class="table-data status"><?php echo h($info[5])?></td>
+        <td class="table-data"><?php echo h($info[3])?></td>
+        <td class="table-data"><?php echo h(a(decryption($info[4])))?></td>
+        <td class="table-data"><?php echo h($info[5])?></td>
         <td class="table-data detail">
           <a href="detail.php?id=<?php echo h($member_id)?>">詳細</a>
         </td>
@@ -217,7 +233,7 @@ if (!empty($member_info) || !empty($_GET))://メンバーが0ではない、ま�
 <?php 
   elseif(empty($member_info))://検索ボタンを押した結果、メンバーが0であった場合
 ?>
-    <p  class="search-none">該当の検索条件では申込データがありません。</p>
+    <p class="search-none">該当の検索条件では申込データがありません。</p>
 <?php 
   endif;
 elseif(empty($member_info) && empty($_GET))://検索ボタンを押す前に既にメンバーが0であった場合

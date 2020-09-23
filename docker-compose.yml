@@ -24,6 +24,9 @@ services:
       - 10080:80
     links:
       - mysql:mysql
+    environment:
+      - ENCRYPTKEY=1234567891123456789112
+      - ENCRYPTIV=1234567891123456
   phpmyadmin:
     image: phpmyadmin/phpmyadmin
     environment:

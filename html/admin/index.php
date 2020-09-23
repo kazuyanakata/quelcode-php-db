@@ -1,10 +1,5 @@
 <?php
-try {
-  $db = new PDO('mysql:dbname=quelcode-php-db;host=mysql;charset=utf8', 'root', 'root');
-} catch (PDOException $e) {
-  header('Location: error.php');
-  exit();
-}
+require_once('dbconnect.php');
 
 function h($value) {// htmlspecialchars設定
   return htmlspecialchars($value, ENT_QUOTES, 'UTF-8');

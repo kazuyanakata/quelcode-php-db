@@ -1,11 +1,6 @@
 <?php
 session_start();
-try {
-  $db = new PDO('mysql:dbname=quelcode-php-db;host=mysql;charset=utf8', 'root', 'root');
-} catch (PDOException $e) {
-  header('Location: ../error.php');
-  exit();
-}
+require_once('../dbconnect.php');
 
 if (!empty($_POST)) {// 更新ボタンを押した場合
   $_SESSION['update'] = $_POST;
@@ -36,6 +31,12 @@ if(!empty($_GET)){
                                     WHERE m.id = ?');
   $member_details-> execute(array($_GET['id']));
   $member_detail = $member_details->fetch();
+}
+// 復号処理
+function decryption($value){
+  $method = 'AES-256-CBC';
+  $decryption_item = openssl_decrypt(base64_decode($value), $method, getenv('ENCRYPTKEY'), OPENSSL_RAW_DATA, getenv('ENCRYPTIV'));
+  return $decryption_item;
 }
 ?>
 <!DOCTYPE html>
@@ -135,23 +136,23 @@ unset($_SESSION['update']);//更新のセッション削除
         </li>
         <li class="member-detail-item">
           <p class="detail-title">名前</p>
-          <p class="detail-content"><?php echo h($member_detail['name'])?></p>
+          <p class="detail-content"><?php echo h(decryption($member_detail['name']))?></p>
         </li>
         <li class="member-detail-item">
           <p class="detail-title">ふりがな</p>
-          <p class="detail-content"><?php echo h($member_detail['furigana'])?></p>
+          <p class="detail-content"><?php echo h(decryption($member_detail['furigana']))?></p>
         </li>
         <li class="member-detail-item">
           <p class="detail-title">メールアドレス</p>
-          <p class="detail-content"><a href="mailto:<?php echo h($member_detail['mail'])?>"><?php echo h($member_detail['mail'])?></a></p>
+          <p class="detail-content"><a href="mailto:<?php echo h(decryption($member_detail['mail']))?>"><?php echo h(decryption($member_detail['mail']))?></a></p>
         </li>
         <li class="member-detail-item">
           <p class="detail-title">電話番号</p>
-          <p class="detail-content"><?php echo h($member_detail['phone_number'])?></p>
+          <p class="detail-content"><?php echo h(decryption($member_detail['phone_number']))?></p>
         </li>
         <li class="member-detail-item">
           <p class="detail-title">生年月日</p>
-          <p class="detail-content"><?php echo h($member_detail['birthday'])?>（満 <?php echo h(a($member_detail['birthday']))?>歳）</p>
+          <p class="detail-content"><?php echo h(decryption($member_detail['birthday']))?>（満 <?php echo h(a(decryption($member_detail['birthday'])))?>歳）</p>
         </li>
         <li class="member-detail-item">
           <p class="detail-title">都道府県</p>
